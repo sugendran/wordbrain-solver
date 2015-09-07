@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Word Brain Solver</title>
+  <link rel="stylesheet" type="text/css" href="vendor/skeleton/css/normalize.css"></link>
+  <link rel="stylesheet" type="text/css" href="vendor/skeleton/css/skeleton.css"></link>
+  <link rel="stylesheet" type="text/css" href="main.css"></link>
+  <script type="text/javascript" src="main.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="eleven columns">
+        <h1>WordBrain Solver</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="two columns">
+        <div>
+          <label for="gridwidth">Grid Width</label>
+          <input id="inp-width" type="number" name="gridwidth" min="2" max="12" step="1" value="2" pattern="\d+" />
+        </div>
+        <div>
+          <input id="btn-solve" class="button-primary" type="button" value="Solve" />
+        </div>
+      </div>
+      <div class="ten columns">
+        <div id="error"></div>
+        <div id="grid"></div>
+        <div id="results"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
