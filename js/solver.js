@@ -22,19 +22,24 @@ GridSolver.prototype.wordCheck = function (letters) {
   return 1;
 }
 
+// Checks a chain of letters to see if it is a possible word
 GridSolver.prototype.possibleChain = function(chain) {
   var letters = chain.map (function (item) { return item.v; });
   return this.wordCheck(letters);
 }
 
-
+// used in the 'some' method below
 GridSolver.prototype.isItemMatch = function (x, y, item) {
   return item.x === x && item.y === y;
 }
 
+// Recursive function to find possible words in the current grid.
+// It starts from the last letter that was selected and tries all
+// adjacent tiles
 GridSolver.prototype.getChain = function (grid, possibleSizes, chain) {
   var result = [];
-  // exit the recursion if we have already reached max
+
+  // exit the recursion if we have already reached max required length
   var len = chain.length + 1;
   if (possibleSizes.every(function (size) { return len > size; })) {
     return [];
@@ -110,9 +115,8 @@ GridSolver.prototype.applyGravity = function (grid) {
 }
 
 GridSolver.prototype.solve = function (grid) {
-    // queue of items to test
-    var options = [];
-    
+    // Queue of items to test. We keep testing until we find a combination
+    // that satisfies the required word sizes
     var toTest = [{grid: grid, wordSizes: this.wordSizes, chains: [] }];
     while (toTest.length > 0) {
       var test = toTest.shift();
@@ -120,6 +124,7 @@ GridSolver.prototype.solve = function (grid) {
       for (var y = 0; y < this.gridWidth; y++) {
         for (var x = 0; x < this.gridWidth; x++) {
 
+          // find possible words from that point
           var possiblities = this.findWordFromPoint(test.grid, x, y, test.wordSizes);
 
           for (var i = 0; i < possiblities.length; i++) {
@@ -135,13 +140,20 @@ GridSolver.prototype.solve = function (grid) {
               return [chains];
             } else {
               var testGrid = this.cloneGrid(test.grid);
-
+              // blank out the tiles we have just used up
               for (var j = 0; j < chain.length; j++) {
                 var item = chain[j];
                 testGrid[item.y][item.x] = "";
               };
-
+              // apply gravity so they all move down as required
               var newGrid = this.applyGravity(testGrid);
+
+              // Move this to the first available slot to test. Moving to 
+              // the front of the queue is important. This way we go as
+              // deep as we can in the possibility tree and eliminate as 
+              // we go. The memory requirement, and hence garbage collection
+              // is way lower. When I had this using 'push' I would spend
+              // quite a bit of time garbage collecting.
               toTest.unshift({ grid: newGrid, wordSizes: remainingSizes, chains: chains });
             }
           }
