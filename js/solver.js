@@ -109,24 +109,10 @@ GridSolver.prototype.applyGravity = function (grid) {
   return result;
 }
 
-GridSolver.prototype.isEmptyGrid = function (grid) {
-  var empty = true;
-  for (var y = 0; y < this.gridWidth && empty; y++) {
-    for (var x = 0; x < this.gridWidth && empty; x++) {
-      if(grid[y][x] !== "") {
-        empty = false;
-      }
-    }
-  }
-  return empty;
-}
-
-
 GridSolver.prototype.solve = function (grid) {
-    var options = [];
     // queue of items to test
     var toTest = [{grid: grid, wordSizes: this.wordSizes, chains: [] }];
-    while (toTest.length > 0 && options.length === 0) {
+    while (toTest.length > 0) {
       var test = toTest.shift();
 
       for (var y = 0; y < this.gridWidth; y++) {
@@ -137,25 +123,30 @@ GridSolver.prototype.solve = function (grid) {
           for (var i = 0; i < possiblities.length; i++) {
             var chain = possiblities[i];
             var chains = test.chains.concat([chain]);
-            var testGrid = this.cloneGrid(test.grid);
-            for (var j = 0; j < chain.length; j++) {
-              var item = chain[j];
-              testGrid[item.y][item.x] = "";
-            };
-            if (this.isEmptyGrid(testGrid)) {
-              options.push(chains);
-            }
-            var newGrid = this.applyGravity(testGrid);
+
+            // remove the word from the list of remaining sizes
             var remainingSizes = [].concat(test.wordSizes);
             var len = chain.length;
             remainingSizes.splice(remainingSizes.indexOf(len), 1);
-            toTest.push({ grid: newGrid, wordSizes: remainingSizes, chains: chains });
+
+            if (remainingSizes.length === 0) {
+              return [chains];
+            } else {
+              var testGrid = this.cloneGrid(test.grid);
+
+              for (var j = 0; j < chain.length; j++) {
+                var item = chain[j];
+                testGrid[item.y][item.x] = "";
+              };
+
+              var newGrid = this.applyGravity(testGrid);
+              toTest.unshift({ grid: newGrid, wordSizes: remainingSizes, chains: chains });
+            }
           }
 
         }
       }
-      console.log(toTest.length + " possiblities left to test");
     }
 
-    return options;
+    return [];
 }
