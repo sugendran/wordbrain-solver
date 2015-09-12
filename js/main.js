@@ -31,6 +31,22 @@ function app() {
     request.send();
   }
 
+  function gridHTML (chain) {
+    var html = [];
+    for (var y = 0; y < gridWidth; y++) {
+      html.push('<div class="grid-row">');
+      for (var x = 0; x < gridWidth; x++) {
+        var vals = chain.filter(function (item) {
+          return item.x === x && item.y === y;
+        });
+        var val = vals.length === 0 ? "" : vals[0].v;
+        html.push('<input type="text" disabled size="1" value="' + val + '" />');
+      }
+      html.push('</div>');
+    };
+    return html.join("");
+  }
+
   function drawGrid () {
     gridWidth = parseInt(document.getElementsByName("gridwidth")[0].value, 10);
     var html = [];
@@ -45,12 +61,17 @@ function app() {
   }
 
   function solutionHTML (solution) {
-    var html = [];
+    var html = ["<hr />"];
     solution.map(function (chainItem) {
+      html.push("<h6>");
       var word = chainItem.reduce(function(w, o) { return w + o.v; }, "");
       html.push(word);
+      html.push("</h6>");
+      html.push("<div>");
+      html.push(gridHTML(chainItem));
+      html.push("</div>");
     });
-    return html.join("<span>, <span>") + "<br />";
+    return html.join("");
   }
 
   function solve () {
@@ -89,12 +110,18 @@ function app() {
     var solutions = solver.solve(grid);
     var end = performance.now();
     var html = solutions.length === 0 ? ["failed to solve"]  : solutions.map(solutionHTML);
-    resultDiv.innerHTML = html.join("") + "<hr />" + "Solved in " + (end - start) + "ms";
+    resultDiv.innerHTML = html.join("") + "<hr />" + "Completed in " + (end - start) + "ms";
   }
 
   function drawWordSizes() {
     wordSizeList.innerHTML = wordSizes.map(function (s) {
-      return "<li>" + s + "</li>";
+      //&#x2610 == ballot box;
+      var html = ["<li>"];
+      for (var i = 0; i < s; i++) {
+        html.push("&#x2610;");
+      };
+      html.push("</li>");
+      return html.join("");
     }).join("");
   }
  

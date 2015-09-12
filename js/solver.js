@@ -111,6 +111,8 @@ GridSolver.prototype.applyGravity = function (grid) {
 
 GridSolver.prototype.solve = function (grid) {
     // queue of items to test
+    var options = [];
+
     var toTest = [{grid: grid, wordSizes: this.wordSizes, chains: [] }];
     while (toTest.length > 0) {
       var test = toTest.shift();
@@ -130,7 +132,7 @@ GridSolver.prototype.solve = function (grid) {
             remainingSizes.splice(remainingSizes.indexOf(len), 1);
 
             if (remainingSizes.length === 0) {
-              return [chains];
+              options.push(chains);
             } else {
               var testGrid = this.cloneGrid(test.grid);
 
@@ -148,5 +150,5 @@ GridSolver.prototype.solve = function (grid) {
       }
     }
 
-    return [];
+    return options;
 }
