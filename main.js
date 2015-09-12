@@ -29,24 +29,6 @@ function app() {
     request.send();
   }
 
-  // returns: 
-  //  0 = no match
-  //  1 = possible word
-  //  2 = word
-  function wordCheck (letters) {
-    var set = dictionary;
-    for (var i = 0; i < letters.length && set !== undefined; i++) {
-      set = set[letters[i]];
-    };
-    if (set === undefined) {
-      return 0;
-    }
-    if (set["&"] === 1) {
-      return 2;
-    }
-    return 1;
-  }
-
   function drawGrid () {
     gridWidth = parseInt(document.getElementsByName("gridwidth")[0].value, 10);
     var html = [];
@@ -58,69 +40,6 @@ function app() {
       html.push('</div>');
     };
     gridDiv.innerHTML = html.join("");
-  }
-
-  function possibleChain(chain) {
-    var letters = chain.map (function (item) { return item.v; });
-    return wordCheck(letters);
-  }
-
-  function isItemMatch(x, y, item) {
-    return item.x === x && item.y === y;
-  }
-
-  function getChain (grid, chain) {
-    var result = [];
-    var last = chain[chain.length - 1];
-    var minX = Math.max(last.x - 1, 0);
-    var maxX = Math.min(last.x + 2, gridWidth);
-    var minY = Math.max(last.y - 1, 0);
-    var maxY = Math.min(last.y + 2, gridWidth);
-    for (var y = minY; y < maxY; y++) {
-      for (var x = minX; x < maxX; x++) {
-        if (grid[y][x] === "" || chain.some(isItemMatch.bind(null, x, y))) {
-          continue;
-        }
-        var possibility = chain.concat([{ x: x, y: y, v: grid[y][x] }]);
-        var isword = possibleChain(possibility);
-        if (isword) {
-          if (isword === 2) {
-            result.push(possibility);
-          }
-          result = result.concat(getChain(grid, possibility));
-        }
-      }
-    }
-    return result;
-  }
-
-  function findWordFromPoint(grid, x, y) {
-    if (grid[y][x] == "") {
-      return;
-    }
-    // first generate a linked list of points
-    var possibilities = getChain(grid, [{ x: x, y: y, v: grid[y][x] }]);
-    var html = ["<div><h3>From position: ", x, ",", y, "</h3></div>"];
-    possibilities.forEach(function (p) {
-      var w = p.reduce(function (word, item) { return word + item.v; }, "");
-      html.push("<div>" + w + "</div>");
-    });
-
-    resultDiv.innerHTML = resultDiv.innerHTML + html.join("");
-    /*
-    {
-      [{ x, y, v }, {x, y, v}]
-    } 
-    */
-  }
-
-  function findWords (grid) {
-    resultDiv.innerHTML = "";
-    for (var y = 0; y < gridWidth; y++) {
-      for (var x = 0; x < gridWidth; x++) {
-        findWordFromPoint(grid, x, y);
-      }
-    }
   }
 
   function solve () {
@@ -146,8 +65,9 @@ function app() {
         }
       }
     }
-    console.log(grid);
-    findWords(grid);
+    var solver = new GridSolver(gridWidth, dictionary);
+    var solutions = solver.solve(grid);
+    console.log(solutions);
   }
 
   (function addClickListener() {
