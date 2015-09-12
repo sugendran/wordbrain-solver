@@ -3,8 +3,10 @@ function app() {
   var errorDiv =  document.getElementById("errors");
   var gridDiv = document.getElementById("grid");
   var resultDiv = document.getElementById("results");
+  var wordSizeList = document.getElementById("word-size-list");
   var dictionary = {};
   var gridWidth = 2;
+  var wordSizes = [];
 
   function writeError(str) {
     errorDiv.innerHTML = "<h4>" + str + "</h4>";
@@ -64,7 +66,7 @@ function app() {
       var element = elements[i];
       var x = element.getAttribute("data-x");
       var y = element.getAttribute("data-y");
-      grid[y][x] = element.value.replace(" ", "");
+      grid[y][x] = element.value.replace(" ", "").toLowerCase();
     }
     for (var y = 0; y < gridWidth; y++) {
       for (var x = 0; x < gridWidth; x++) {
@@ -74,20 +76,58 @@ function app() {
         }
       }
     }
-    var solver = new GridSolver(gridWidth, dictionary);
+    var sum = wordSizes.reduce(function (a, b) { return a + b; }, 0);
+    if (sum !== gridWidth * gridWidth) {
+      writeError("Please make sure the required word sizes are correct");
+      return;
+    }
+
+    errorDiv.innerHTML = "";
+    resultDiv.innerHTML = "";
+    var start = performance.now();
+    var solver = new GridSolver(gridWidth, dictionary, wordSizes);
     var solutions = solver.solve(grid);
-    var html = solutions.map(solutionHTML);
-    resultDiv.innerHTML = html.join("");
+    var end = performance.now();
+    var html = solutions.length === 0 ? ["failed to solve"]  : solutions.map(solutionHTML);
+    resultDiv.innerHTML = html.join("") + "<hr />" + "Solved in " + (end - start) + "ms";
   }
 
-  (function addClickListener() {
+  function drawWordSizes() {
+    wordSizeList.innerHTML = wordSizes.map(function (s) {
+      return "<li>" + s + "</li>";
+    }).join("");
+  }
+ 
+  function addWordSize() {
+    var size = parseInt(document.getElementById("inp-size").value, 10);
+    wordSizes.push(size);
+    var sum = wordSizes.reduce(function (a, b) { return a + b; }, 0);
+    if (sum > gridWidth * gridWidth) {
+      writeError("Required word sizes are larger than the space in the grid! Reset and start again.");
+    }
+    drawWordSizes();
+  }
+
+  function reset() {
+    errorDiv.innerHTML = "";
+    resultDiv.innerHTML = "";
+    wordSizes = [];
+    wordSizeList.innerHTML = "<li>No word sizes set</li>"
+    drawGrid();
+  }
+
+  (function () {
     var btn = document.getElementById("btn-solve");
     btn.addEventListener("click", solve);
-  })();
 
-  (function addWidthChangeListener() {
-    var input = document.getElementById("inp-width");
-    input.addEventListener("change", drawGrid);
+    var inputWidth = document.getElementById("inp-width");
+    inputWidth.addEventListener("change", drawGrid);
+
+    var btnAdd = document.getElementById("btn-add");
+    btnAdd.addEventListener("click", addWordSize);
+
+    var btnReset = document.getElementById("btn-reset");
+    btnReset.addEventListener("click", reset);
   })();
 
   loadDictionary(drawGrid);

@@ -20,16 +20,25 @@
       </div>
     </div>
     <div class="row">
-      <div class="two columns">
+      <div class="three columns">
         <div>
           <label for="gridwidth">Grid Width</label>
           <input id="inp-width" type="number" name="gridwidth" min="2" max="12" step="1" value="2" pattern="\d+" />
         </div>
         <div>
+          <label for="wordsize">Required Word Sizes</label>
+          <ul id="word-size-list">
+            <li>No word sizes set</li>
+          </ul>
+          <input id="inp-size" type="number" name="wordsize" min="2" max="16" step="1" value="4" pattern="\d+" />
+          <input id="btn-add" class="button" type="button" value="Add" />
+        </div>
+        <div>
           <input id="btn-solve" class="button-primary" type="button" value="Solve" />
+          <input id="btn-reset" class="button" type="button" value="Reset" />
         </div>
       </div>
-      <div class="ten columns">
+      <div class="nine columns">
         <div id="errors"></div>
         <div id="grid"></div>
         <div id="results"></div>

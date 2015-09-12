@@ -1,6 +1,7 @@
-function GridSolver (gridWidth, dictionary) {
+function GridSolver (gridWidth, dictionary, wordSizes) {
   this.gridWidth = gridWidth;
   this.dictionary = dictionary;
+  this.wordSizes = wordSizes;
 }
 
   // returns: 
@@ -31,13 +32,20 @@ GridSolver.prototype.isItemMatch = function (x, y, item) {
   return item.x === x && item.y === y;
 }
 
-GridSolver.prototype.getChain = function (grid, chain) {
+GridSolver.prototype.getChain = function (grid, possibleSizes, chain) {
   var result = [];
+  // exit the recursion if we have already reached max
+  var len = chain.length + 1;
+  if (possibleSizes.every(function (size) { return len > size; })) {
+    return [];
+  }
+
   var last = chain[chain.length - 1];
   var minX = Math.max(last.x - 1, 0);
   var maxX = Math.min(last.x + 2, this.gridWidth);
   var minY = Math.max(last.y - 1, 0);
   var maxY = Math.min(last.y + 2, this.gridWidth);
+
   for (var y = minY; y < maxY; y++) {
     for (var x = minX; x < maxX; x++) {
       if (grid[y][x] === "" || chain.some(this.isItemMatch.bind(this, x, y))) {
@@ -46,10 +54,15 @@ GridSolver.prototype.getChain = function (grid, chain) {
       var possibility = chain.concat([{ x: x, y: y, v: grid[y][x] }]);
       var isword = this.possibleChain(possibility);
       if (isword) {
+        var nextSizes = [].concat(possibleSizes);
         if (isword === 2) {
-          result.push(possibility);
+          var indx = nextSizes.indexOf(len);
+          if (indx !== -1) {
+            result.push(possibility);
+            nextSizes.splice(indx, 1);
+          }
         }
-        result = result.concat(this.getChain(grid, possibility));
+        result = result.concat(this.getChain(grid, nextSizes, possibility));
       }
     }
   }
@@ -57,12 +70,12 @@ GridSolver.prototype.getChain = function (grid, chain) {
 }
 
 
-GridSolver.prototype.findWordFromPoint = function (grid, x, y) {
+GridSolver.prototype.findWordFromPoint = function (grid, x, y, possibleSizes) {
   if (grid[y][x] == "") {
     return [];
   }
   // generate a linked list of points that form a word
-  return this.getChain(grid, [{ x: x, y: y, v: grid[y][x] }]);
+  return this.getChain(grid, possibleSizes, [{ x: x, y: y, v: grid[y][x] }]);
 }
 
 GridSolver.prototype.cloneGrid = function (grid) {
@@ -112,14 +125,14 @@ GridSolver.prototype.isEmptyGrid = function (grid) {
 GridSolver.prototype.solve = function (grid) {
     var options = [];
     // queue of items to test
-    var toTest = [{grid: grid, chains: [] }];
-    while (toTest.length > 0) {
+    var toTest = [{grid: grid, wordSizes: this.wordSizes, chains: [] }];
+    while (toTest.length > 0 && options.length === 0) {
       var test = toTest.shift();
 
       for (var y = 0; y < this.gridWidth; y++) {
         for (var x = 0; x < this.gridWidth; x++) {
 
-          var possiblities = this.findWordFromPoint(test.grid, x, y);
+          var possiblities = this.findWordFromPoint(test.grid, x, y, test.wordSizes);
 
           for (var i = 0; i < possiblities.length; i++) {
             var chain = possiblities[i];
@@ -132,11 +145,17 @@ GridSolver.prototype.solve = function (grid) {
             if (this.isEmptyGrid(testGrid)) {
               options.push(chains);
             }
-            toTest.push({ grid: this.applyGravity(testGrid), chains: chains });
+            var newGrid = this.applyGravity(testGrid);
+            var remainingSizes = [].concat(test.wordSizes);
+            var len = chain.length;
+            remainingSizes.splice(remainingSizes.indexOf(len), 1);
+            toTest.push({ grid: newGrid, wordSizes: remainingSizes, chains: chains });
           }
 
         }
       }
+      console.log(toTest.length + " possiblities left to test");
     }
+
     return options;
 }
