@@ -1,0 +1,17 @@
+{
+  "name": "wordbrain-solver",
+  "version": "0.0.0",
+  "homepage": "https://github.com/sugendran/wordbrain-solver",
+  "authors": [
+    "Sugendran Ganess <sugendran@sugendran.net>"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jasmine-core": "jasmine#~2.3.4",
+    "skeleton": "skeleton-css#~2.0.4",
+    "msgpack-js": "~0.3.0"
+  }
+}

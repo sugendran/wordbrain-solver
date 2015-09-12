@@ -12,7 +12,7 @@ function app() {
 
   function loadDictionary (next) {
     var request = new XMLHttpRequest();
-    request.open('GET', 'out.json', true);
+    request.open('GET', 'data/dictionary.json', true);
 
     request.onload = function() {
       if (request.status >= 200 && request.status < 400) {
@@ -42,6 +42,15 @@ function app() {
     gridDiv.innerHTML = html.join("");
   }
 
+  function solutionHTML (solution) {
+    var html = [];
+    solution.map(function (chainItem) {
+      var word = chainItem.reduce(function(w, o) { return w + o.v; }, "");
+      html.push(word);
+    });
+    return html.join("<span>, <span>") + "<br />";
+  }
+
   function solve () {
     var elements = document.getElementsByName("gridelement");
     var grid = [];
@@ -67,7 +76,8 @@ function app() {
     }
     var solver = new GridSolver(gridWidth, dictionary);
     var solutions = solver.solve(grid);
-    console.log(solutions);
+    var html = solutions.map(solutionHTML);
+    resultDiv.innerHTML = html.join("");
   }
 
   (function addClickListener() {

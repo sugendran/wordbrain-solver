@@ -123,7 +123,7 @@ GridSolver.prototype.solve = function (grid) {
 
           for (var i = 0; i < possiblities.length; i++) {
             var chain = possiblities[i];
-            var chains = test.chains.concat(chain);
+            var chains = test.chains.concat([chain]);
             var testGrid = this.cloneGrid(test.grid);
             for (var j = 0; j < chain.length; j++) {
               var item = chain[j];
